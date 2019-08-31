@@ -264,6 +264,7 @@ def main():
     inout_group.add_argument("--fam", help="FAM file with phenotype info", type=str)
     inout_group.add_argument("--samples", help="File with list of samples to include", type=str)
     inout_group.add_argument("--exclude-samples", help="File with list of samples to exclude", type=str)
+    inout_group.add_argument("--vcf-samples-delim", help="FID and IID delimiter in VCF", type=str)
     pheno_group = parser.add_argument_group("Phenotypes")
     pheno_group.add_argument("--pheno", help="Phenotypes file (to use instead of --fam)", type=str)
     pheno_group.add_argument("--mpheno", help="Use (n+2)th column from --pheno", type=int, default=1)
@@ -327,7 +328,10 @@ def main():
 
     # Set sample ID to FID_IID to match vcf
     common.MSG("Set up sample info")
-    pdata["sample"] = pdata.apply(lambda x: x["FID"]+"_"+x["IID"], 1)
+    if args.vcf_samples_delim is not None:
+        pdata["sample"] = pdata.apply(lambda x: x["FID"]+args.vcf_samples_delim+x["IID"], 1)
+    else:
+        pdata["sample"] = pdata.apply(lambda x: x["IID"], 1)
     reader_samples = set(reader.samples)
     pdata = pdata[pdata["sample"].apply(lambda x: x in reader_samples)]
     sample_order = list(pdata["sample"])
