@@ -57,8 +57,8 @@ def GetAssocType(is_str, alt=-1, alt_len=-1, name=None):
     """
     if not is_str: return "SNP"
     else:
-        if alt >= 0: return "%s-alt-%s"%(name,alt)
-        elif alt_len >= 0: return "%s-length-%s"%(name,alt_len)
+        if alt != -1: return "%s-alt-%s"%(name,alt)
+        elif alt_len != -1: return "%s-length-%s"%(name,alt_len)
         elif not name is None: return name
         else: return "STR"
 
