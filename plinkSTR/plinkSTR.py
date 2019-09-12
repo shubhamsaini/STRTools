@@ -33,7 +33,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import argparse
-import strtools.utils.common as common
+#import strtools.utils.common as common
+import common
 import numpy as np
 import pandas as pd
 from statsmodels.formula.api import logit
@@ -382,13 +383,23 @@ def main():
             for i in range(len(record.ALT)+1):
                 gts, exclude_samples = LoadGT(record, sample_order, is_str=True, use_alt_num=i)
                 pdata["GT"] = gts
-                assoc = PerformAssociation(pdata, covarcols, case_control=args.logistic, quant=args.linear, maf=aaf, exclude_samples=exclude_samples, maxiter=args.max_iter)
+                if pdata.shape[0] == 0:
+                    continue
+                allele_maf = sum(pdata["GT"])*1.0/(2*pdata.shape[0])
+                if allele_maf == 0:
+                    continue
+                assoc = PerformAssociation(pdata, covarcols, case_control=args.logistic, quant=args.linear, maf=allele_maf, exclude_samples=exclude_samples, maxiter=args.max_iter)
                 OutputAssoc(record.CHROM, record.POS, assoc, outf, assoc_type=GetAssocType(is_str, alt=alleles[i], name=record.ID))
         if is_str and args.allele_tests_length:
             for length in set([len(record.REF)] + [len(alt) for alt in record.ALT]):
                 gts, exclude_samples = LoadGT(record, sample_order, is_str=True, use_alt_length=length)
                 pdata["GT"] = gts
-                assoc = PerformAssociation(pdata, covarcols, case_control=args.logistic, quant=args.linear, maf=aaf, exclude_samples=exclude_samples, maxiter=args.max_iter)
+                if pdata.shape[0] == 0:
+                    continue
+                allele_maf = sum(pdata["GT"])*1.0/(2*pdata.shape[0])
+                if allele_maf == 0:
+                    continue
+                assoc = PerformAssociation(pdata, covarcols, case_control=args.logistic, quant=args.linear, maf=allele_maf, exclude_samples=exclude_samples, maxiter=args.max_iter)
                 OutputAssoc(record.CHROM, record.POS, assoc, outf, assoc_type=GetAssocType(is_str, alt_len=length, name=record.ID))
 
 if __name__ == "__main__":
